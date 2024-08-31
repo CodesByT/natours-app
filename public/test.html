@@ -1,0 +1,211 @@
+<!-- <!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - My Notes</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #e8f0fe;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      .login-container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        width: 350px;
+      }
+      .login-container h2 {
+        margin-bottom: 20px;
+        color: #333;
+        text-align: center;
+        font-size: 24px;
+      }
+      .input-field-container {
+        position: relative;
+        margin-bottom: 20px;
+      }
+      .input-field {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      .eye-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+      }
+      .login-button {
+        width: 100%;
+        padding: 12px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .login-button:hover {
+        background-color: #0056b3;
+      }
+      .login-container p {
+        text-align: center;
+        margin-top: 20px;
+        color: #555;
+      }
+      .login-container a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      .login-container a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>My Notes - Login</h2>
+      <div class="input-field-container">
+        <input type="text" class="input-field" placeholder="Username" />
+      </div>
+      <div class="input-field-container">
+        <input
+          type="password"
+          class="input-field"
+          id="password-field"
+          placeholder="Password"
+        />
+        <span class="eye-icon" onclick="togglePasswordVisibility()">👁️</span>
+      </div>
+      <button class="login-button">Login</button>
+      <p>New to My Notes? <a href="#">Create an account</a></p>
+    </div>
+
+    <script>
+      function togglePasswordVisibility() {
+        const passwordField = document.getElementById('password-field')
+        const eyeIcon = document.querySelector('.eye-icon')
+        if (passwordField.type === 'password') {
+          passwordField.type = 'text'
+          eyeIcon.textContent = '🙈'
+        } else {
+          passwordField.type = 'password'
+          eyeIcon.textContent = '👁️'
+        }
+      }
+    </script>
+  </body>
+</html> -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Notes - Homepage</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f4f8;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+      }
+      header {
+        width: 100%;
+        background-color: #007bff;
+        color: white;
+        padding: 15px 20px;
+        text-align: center;
+        font-size: 24px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .notes-container {
+        margin-top: 20px;
+        width: 90%;
+        max-width: 800px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .note-card {
+        background-color: #ffffff;
+        width: 100%;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      .note-title {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: #333;
+      }
+      .note-content {
+        font-size: 14px;
+        color: #555;
+      }
+      .add-note-button {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        font-size: 16px;
+      }
+      .add-note-button:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <header>My Notes</header>
+    <div class="notes-container">
+      <!-- Example note -->
+      <div class="note-card">
+        <div class="note-title">Note Title 1</div>
+        <div class="note-content">
+          This is an example of a note content. You can add more notes by
+          clicking the button below.
+        </div>
+      </div>
+
+      <div class="note-card">
+        <div class="note-title">Note Title 2</div>
+        <div class="note-content">
+          Another note content goes here. Organize your thoughts and ideas
+          easily.
+        </div>
+      </div>
+
+      <!-- Add more notes here -->
+
+      <button class="add-note-button" onclick="addNewNote()">
+        + Add New Note
+      </button>
+    </div>
+
+    <script>
+      function addNewNote() {
+        alert('Add new note functionality goes here.')
+        // You can implement a modal or redirect to another page to add a new note.
+      }
+    </script>
+  </body>
+</html>
