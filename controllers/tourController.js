@@ -117,7 +117,9 @@ exports.getTourStatistics = async (request, response) => {
       {
         $group: {
           // _id: '$difficulty',
-          _id: '$ratingAverage',
+          // _id: '$ratingAverage',
+          _id: { $toUpper: '$difficulty' },
+
           numberOfTours: { $sum: 1 }, // for each of the documents it will go through it will add one to this sum
           totalNumberOfRating: { $sum: '$ratingsQuantity' },
           averageRating: { $avg: '$ratingAverage' },
@@ -126,11 +128,74 @@ exports.getTourStatistics = async (request, response) => {
           maxPrice: { $max: '$price' },
         },
       },
+      {
+        $sort: { avgPrice: 1 } /* 1 for ascending*/,
+      },
     ])
     response.status(200).json({
       status: 'success',
       data: {
         tour: stats,
+      },
+    })
+  } catch (error) {
+    response.status(404).json({
+      status: 'failed',
+      data: {},
+    })
+  }
+}
+exports.getMonthlyPlan = async (request, response) => {
+  console.log('working1')
+  try {
+    const year = request.params.year * 1
+    const plan = await Tour.aggregate([
+      {
+        $unwind: '$startDates', // helps to unwind the multiple values against an attribute
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          numberOfTours_a_month: { $sum: 1 }, // Adding one aginst each entry
+          tours: {
+            $push: '$name',
+          },
+        },
+      },
+      {
+        $addFields: {
+          month: '$_id',
+        },
+      },
+      {
+        $project: {
+          // we are doing this just to exclude the id field
+          _id: 0,
+        },
+      },
+      {
+        $sort: {
+          numberOfTours_a_month: -1, // using -1 for descending
+        },
+      },
+      {
+        $limit: 12, // only six outputs
+      },
+    ])
+    console.log('working3')
+
+    response.status(200).json({
+      status: 'success',
+      data: {
+        tour: plan,
       },
     })
   } catch (error) {

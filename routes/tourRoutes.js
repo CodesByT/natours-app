@@ -13,6 +13,7 @@ const router = express.Router()
 //   next()
 // })
 
+router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan)
 router.route('/tour-statistics').get(tourController.getTourStatistics)
 
 router
