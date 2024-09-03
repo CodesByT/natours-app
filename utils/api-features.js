@@ -46,7 +46,7 @@ class APIFeatures {
     return this // THIS KEYWORD WILL HELP TO CHAIN THE FUNCTIONS WHILE CREATING THE OBJECT
   }
 
-  async paginate() {
+  paginate() {
     const pageNo = this.queryFromRequest.page * 1 || 1
     const limitNo = this.queryFromRequest.limit * 1 || 100
 
@@ -54,12 +54,12 @@ class APIFeatures {
       .skip((pageNo - 1) * limitNo)
       .limit(limitNo)
 
-    if (this.queryFromRequest.page) {
-      const numTours = await Tour.countDocuments()
+    // if (this.queryFromRequest.page) {
+    //   const numTours = await Tour.countDocuments()
 
-      if ((pageNo - 1) * limitNo >= numTours)
-        throw new Error('This page does not exist')
-    }
+    //   if ((pageNo - 1) * limitNo >= numTours)
+    //     throw new Error('This page does not exist')
+    // }
 
     return this // THIS KEYWORD WILL HELP TO CHAIN THE FUNCTIONS WHILE CREATING THE OBJECT
   }
