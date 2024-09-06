@@ -21,6 +21,22 @@ exports.signup = catchAsync(async (request, response, next) => {
 
   const token = assignToken(user._id)
 
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 100,
+    ),
+    httpOnly: true, // cookie cannot be accessed by the browser in any way
+    // the onlything browser can do is to receive the cookie store it
+    // and sent it along with the requests
+  }
+
+  if (process.env.NODE_ENV == 'production') cookieOptions.secure = true // cookie will only sent on an HTTPS secure route
+
+  response.cookie('jwt', token, cookieOptions)
+
+  // Remove the password from outputing in json response
+  user.password = undefined
+
   response.status(200).json({
     status: 'success',
     token,
@@ -50,6 +66,20 @@ exports.login = catchAsync(async (request, response, next) => {
   //3) after checking send token to client
   const token = assignToken(user._id)
 
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 100,
+    ),
+    httpOnly: true,
+  }
+
+  if (process.env.NODE_ENV == 'production') cookieOptions.secure = true
+
+  response.cookie('jwt', token, cookieOptions)
+
+  // Remove the password from outputing in json response
+  user.password = undefined
+
   response.status(200).json({
     status: 'success',
     token: token,
@@ -59,7 +89,11 @@ exports.login = catchAsync(async (request, response, next) => {
 exports.protect = catchAsync(async (request, response, next) => {
   // 1) get the token and check it
   let token
-  if (request.headers.authorization.startsWith('Bearer')) {
+
+  if (
+    request.headers.authorization &&
+    request.headers.authorization.startsWith('Bearer')
+  ) {
     token = request.headers.authorization.split(' ')[1]
   }
   if (!token) {

@@ -81,15 +81,18 @@ userSchema.pre('save', async function (next) {
 
   next()
 })
+// using Query middleware to avoid displaying in-active users
+userSchema.pre(/^find/, function (next) {
+  // this points to the currect query
+  this.find({ active: { $ne: false } })
+  next()
+})
 
 // This is an instance method available for each document
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword,
 ) {
-  // comparing the passwords by hashing
-  // the user password to check against the already
-  // hashed password in our database
   return await bcrypt.compare(candidatePassword, userPassword)
 }
 

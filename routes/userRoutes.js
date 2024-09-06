@@ -17,13 +17,13 @@ router.patch(
   authController.protect,
   authController.updatePassword,
 )
-router.patch(
-  '/deactivateMe',
+router.delete(
+  '/deactivate-me',
   authController.protect,
   userController.deactivateMe,
 )
 
-router.patch('/UpdateMe', authController.protect, userController.UpdateMe)
+router.patch('/updateMe', authController.protect, userController.UpdateMe)
 
 router
   .route('/')
