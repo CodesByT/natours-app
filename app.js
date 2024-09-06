@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
 }
 
-app.use(express.static(`${__dirname}/public/`)) // Using a static middleware which will serve the files to the browser e.g. html files etc
+app.use(express.static(`${__dirname}/dev-data/templates/`)) // Using a static middleware which will serve the files to the browser e.g. html files etc
 
 app.use('/api/v1/tours', tourRouter)
 app.use('/api/v1/users', userRouter)

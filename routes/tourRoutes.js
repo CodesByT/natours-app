@@ -3,7 +3,7 @@ const express = require('express')
 const tourController = require('../controllers/tourController')
 
 const router = express.Router()
-
+const authController = require('../controllers/authController')
 // Creating a parameteric middleware which runs only against some parameters
 // router.param('id', tourController.checkID)
 // router.param('id', (request, response, next, value) => {
@@ -18,13 +18,17 @@ router.route('/tour-statistics').get(tourController.getTourStatistics)
 
 router
   .route('/')
-  .get(tourController.getAllTours)
+  .get(authController.protect, tourController.getAllTours)
   .post(tourController.addNewTour) // Chaining two middlewares
 
 router
   .route('/:id')
   .get(tourController.getTourById)
   .patch(tourController.updateTourById)
-  .delete(tourController.deleteTourById)
+  .delete(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide'),
+    tourController.deleteTourById,
+  )
 
 module.exports = router

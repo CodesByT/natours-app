@@ -44,6 +44,9 @@ const sendErrorDevelopment = (error, response) => {
     stack: error.stack,
   })
 }
+const handleJWTError = (error) => new AppError('Invalid Token!', 401)
+const handleJWTExpiredError = (error) =>
+  new AppError('Token timer expired!', 401)
 
 module.exports = (error, request, response, next) => {
   error.statusCode = error.statuscode || 500
@@ -62,6 +65,12 @@ module.exports = (error, request, response, next) => {
     }
     if (err.name === 'ValidationError') {
       err = handleValidationErrorDB(err)
+    }
+    if (err.name === 'JsonWebTokenError') {
+      err = handleJWTError(err)
+    }
+    if (err.name === 'TokenExpiredError') {
+      err = handleJWTExpiredError(err)
     }
 
     sendErrorProduction(err, response)
