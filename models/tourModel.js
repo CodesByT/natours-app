@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const slugify = require('slugify')
 const validator = require('validator')
+const User = require('./userModel')
 
 const tourSchema = new mongoose.Schema(
   {
@@ -78,6 +79,33 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Embedding Locations in our tours document
+    startLocation: {
+      // GeoJSON user to specify the geospatial data
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    // References the User with _id
+    guides: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   },
   {
     toJSON: { virtuals: true },
@@ -89,7 +117,7 @@ const tourSchema = new mongoose.Schema(
 tourSchema.virtual('durationWeeks').get(function () {
   // use of function() keyword here is because we need this keyword which is not available with an anonymous function
   // VIRTIUAL PROPERTIES are those which we calculate on the run time, usually these are the
-  // properties which are divided from the other attributes
+  // properties which are drived from the other attributes
 
   return this.duration / 7
 })
@@ -99,14 +127,10 @@ tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true })
   next()
 })
-
-// tourSchema.pre('save', function (next) {
-//   console.log('Will save document...')
-//   next()
-// })
-
-// tourSchema.post('save', function (document, next) {
-//   console.log(document)
+// This will embedd the users in the tours document
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(async (id) => await User.findById(id))
+//   this.guides = await Promise.all(guidesPromises)
 //   next()
 // })
 
@@ -117,9 +141,15 @@ tourSchema.pre(/^find/, function (next) {
   this.start = Date.now()
   next()
 })
-tourSchema.post(/^find/, function (document, next) {
-  console.log(`Query took: ${Date.now() - this.start} milliseconds`)
-  console.log(document)
+
+tourSchema.pre(/^find/, function (next) {
+  // .populate() will fill the respective feild with the data from its given reference
+  // this function is an absolute essential when working with referencing in mongoose
+
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  })
   next()
 })
 // AGGREGATION MIDDLEWARE
@@ -127,6 +157,12 @@ tourSchema.pre('aggregate', function (next) {
   this.pipeline.unshift({ $match: { secretTour: { $ne: true } } })
 
   console.log(this.pipeline()) // point to the current aggregation function
+  next()
+})
+
+tourSchema.post(/^find/, function (document, next) {
+  console.log(`Query took: ${Date.now() - this.start} milliseconds`)
+  console.log(document)
   next()
 })
 

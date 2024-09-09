@@ -9,6 +9,8 @@ const app = express()
 
 const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
+const reviewRouter = require('./routes/reviewRoutes')
+
 const AppError = require('./utils/app-error')
 const globalErrorHandler = require('./controllers/errorController')
 
@@ -59,6 +61,7 @@ app.use(express.static(`${__dirname}/dev-data/templates/`)) // Using a static mi
 // Routes
 app.use('/api/v1/tours', tourRouter)
 app.use('/api/v1/users', userRouter)
+app.use('/api/v1/review', reviewRouter)
 
 app.all('*', (request, response, next) => {
   next(new AppError(`can't find ${request.originalUrl} on the server`, 404))

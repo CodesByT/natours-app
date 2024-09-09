@@ -1,5 +1,3 @@
-/* eslint-disable node/no-unsupported-features/es-syntax */
-const fs = require('fs')
 const Tour = require('../models/tourModel')
 
 const APIFeatures = require('../utils/api-features')
@@ -36,6 +34,7 @@ exports.getAllTours = catchAsync(async (request, response, next) => {
 
 exports.getTourById = catchAsync(async (request, response, next) => {
   // const getTour = await Tour.find({ _id: request.params.id })
+
   const getTour = await Tour.findById(request.params.id)
 
   if (!getTour) {
