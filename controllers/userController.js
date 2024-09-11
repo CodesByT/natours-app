@@ -1,6 +1,7 @@
 const User = require('../models/userModel')
 const AppError = require('../utils/app-error')
 const catchAsync = require('../utils/catch-async')
+const factory = require('./handlerFactory')
 
 const filterObj = (object, ...allowedFields) => {
   const newObject = {}
@@ -9,16 +10,6 @@ const filterObj = (object, ...allowedFields) => {
   })
   return newObject
 }
-
-exports.getAllUsers = catchAsync(async (request, response, next) => {
-  const users = await User.find()
-
-  response.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: { users },
-  })
-})
 
 exports.UpdateMe = catchAsync(async (request, response, next) => {
   //  1) Create error if user POSTs password data
@@ -45,16 +36,10 @@ exports.UpdateMe = catchAsync(async (request, response, next) => {
   })
 })
 
-exports.getUser = (request, response) => {
-  response.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  })
-}
 exports.createNewUsers = (request, response) => {
   response.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined',
+    message: 'This route is not yet defined! user sign up instead',
   })
 }
 
@@ -64,12 +49,13 @@ exports.updateUser = (request, response) => {
     message: 'This route is not yet defined',
   })
 }
-exports.deleteUser = (request, response) => {
-  response.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  })
-}
+
+// we will never update the password with this update method
+exports.updateUserById = factory.updateOne(User)
+exports.deleteUserById = factory.deleteOne(User)
+exports.getAllUsers = factory.getAll(User)
+exports.getUser = factory.getOne(User)
+
 exports.deactivateMe = catchAsync(async (request, response) => {
   await User.findByIdAndUpdate(request.user.id, { active: false })
 

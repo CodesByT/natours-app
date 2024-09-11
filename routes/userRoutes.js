@@ -33,7 +33,11 @@ router
 router
   .route('/:id')
   .get(userController.getUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser)
+  .patch(userController.updateUserById)
+  .delete(
+    authController.protect,
+    authController.restrictTo('admin'),
+    userController.deleteUserById,
+  )
 
 module.exports = router

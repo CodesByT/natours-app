@@ -5,6 +5,8 @@ const APIFeatures = require('../utils/api-features')
 const catchAsync = require('../utils/catch-async')
 const AppError = require('../utils/app-error')
 
+const factory = require('./handlerFactory')
+
 exports.aliasTopFiveTours = (request, response, next) => {
   request.query.limit = '5'
   request.query.sort = '-ratingsAverage, price'
@@ -14,76 +16,15 @@ exports.aliasTopFiveTours = (request, response, next) => {
   next()
 }
 
-exports.getAllTours = catchAsync(async (request, response, next) => {
-  // console.log('QUERY: ', request.query) // i guess it identify the query from the question mark like tour?duration[lte]=70
-  // console.log('PARAMS: ', request.params)
-  const features = new APIFeatures(Tour.find(), request.query)
-    .filter()
-    .sort()
-    .limit()
-    .paginate()
+exports.getAllTours = factory.getAll(Tour)
 
-  const tours = await features.queryForMongo
+exports.getTourById = factory.getOne(Tour, { path: 'reviews' })
 
-  response.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: { tours },
-  })
-})
+exports.addNewTour = factory.createOne(Tour)
 
-exports.getTourById = catchAsync(async (request, response, next) => {
-  // const getTour = await Tour.find({ _id: request.params.id })
+exports.updateTourById = factory.updateOne(Tour)
 
-  const getTour = await Tour.findById(request.params.id).populate('reviews')
-
-  if (!getTour) {
-    return next(new AppError('No Tour found', 404))
-  }
-
-  response.status(200).json({
-    status: 'success',
-    message: getTour,
-  })
-})
-
-exports.addNewTour = catchAsync(async (request, response, next) => {
-  const newTour = await Tour.create(request.body)
-  response.status(200).json({
-    status: 'success',
-    message: newTour,
-  })
-})
-
-exports.updateTourById = catchAsync(async (request, response, next) => {
-  const tour = await Tour.findByIdAndUpdate(request.params.id, request.body, {
-    new: true,
-    runValidators: true,
-  })
-
-  if (!tour) {
-    return next(new AppError('No Tour found', 404))
-  }
-
-  response.status(200).json({
-    status: 'success',
-    data: {
-      tour: tour,
-    },
-  })
-})
-
-exports.deleteTourById = catchAsync(async (request, response, next) => {
-  const tour = await Tour.findByIdAndDelete(request.params.id)
-
-  if (!tour) {
-    return next(new AppError('No Tour found', 404))
-  }
-
-  response.status(200).json({
-    status: 'success',
-  })
-})
+exports.deleteTourById = factory.deleteOne(Tour)
 
 exports.getTourStatistics = catchAsync(async (request, response, next) => {
   // CREATING AGGREGATION PIPELINE IN MONGO
