@@ -2,8 +2,13 @@ const express = require('express')
 
 const reviewController = require('../controllers/reviewController')
 
-const router = express.Router()
 const authController = require('../controllers/authController')
+
+// by default the routers have access to there on route paramaters
+// by we are also calling the addReview from tourController
+// which has to come with a tourId so we have to merge the
+// params of these we routers and has to enable the mergeParams option
+const router = express.Router({ mergeParams: true })
 
 router
   .route('/')
@@ -14,6 +19,6 @@ router
     reviewController.addReview,
   )
 
-router.route('/:id').get(authController.protect, reviewController.getReview)
+// router.route('/:id').get(authController.protect, reviewController.getReview)
 
 module.exports = router

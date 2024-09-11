@@ -4,6 +4,10 @@ const tourController = require('../controllers/tourController')
 
 const router = express.Router()
 const authController = require('../controllers/authController')
+const reviewController = require('../controllers/reviewController')
+
+const reviewRouter = require('../routes/reviewRoutes')
+
 // Creating a parameteric middleware which runs only against some parameters
 // router.param('id', tourController.checkID)
 // router.param('id', (request, response, next, value) => {
@@ -30,5 +34,7 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     tourController.deleteTourById,
   )
+
+router.use('/:tourId/reviews', reviewRouter)
 
 module.exports = router

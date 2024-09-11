@@ -121,6 +121,15 @@ tourSchema.virtual('durationWeeks').get(function () {
 
   return this.duration / 7
 })
+// Setting virtual middleware to get the reviews against a tour
+// in the case of parent referencing
+// virtual populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'relatedTour', // relatedTour is the field name is our review model
+  localField: '_id', // this _id is
+})
+
 // defining a mongoose middleware
 tourSchema.pre('save', function (next) {
   // this middleware will run before an actual data save or create in the database
