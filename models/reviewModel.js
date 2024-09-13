@@ -54,6 +54,50 @@ reviewSchema.pre(/^find/, function (next) {
   next()
 })
 
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true })
+
+// Creating the static method
+reviewSchema.statics.calculateAverageRatings = async function (tour_id) {
+  const stats = awaitthis.aggregate([
+    {
+      $match: { tour: tour_id },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ])
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tour_id, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating,
+    })
+  } else {
+    await Tour.findByIdAndUpdate(tour_id, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    })
+  }
+}
+
+reviewSchema.post('save', function () {
+  this.constructor.calculateAverageRatings(this.tour)
+}) // In post middleware we do not have next()
+
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  this.r = await this.findOne()
+  next()
+})
+reviewSchema.post(/^findOneAnd/, async function (next) {
+  //
+  //  this.r = await this.findOne() DOES NOT WORK HERE BECAUSE AT THIS POINT QUERY IS ALREADY EXECUTED
+
+  await this.r.constructor.calculateAverageRatings(this.r.tour)
+})
+
 const Review = mongoose.model('Review', reviewSchema)
 
 module.exports = Review

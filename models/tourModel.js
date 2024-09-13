@@ -47,6 +47,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, 'rating must start from 1'],
       max: [5, 'rating must be leen than equal to 5'],
+      set: (val) => Math.round(val * 10) / 10, // to round of the value
     },
     ratingRequired: {
       type: Number,
@@ -113,6 +114,12 @@ const tourSchema = new mongoose.Schema(
   },
 ) // first parameter is for schema definition and next parameter is for the options
 
+// Setting Indexes for efficient retrievel
+tourSchema.index({ price: 1, ratingsAverage: -1 })
+tourSchema.index({ slug: 1 })
+tourSchema.index({ startLocation: '2dsphere' })
+// tourSchema.index({ price: 1 })
+
 // SETTING VIRTUAL PROPERTIES
 tourSchema.virtual('durationWeeks').get(function () {
   // use of function() keyword here is because we need this keyword which is not available with an anonymous function
@@ -162,12 +169,12 @@ tourSchema.pre(/^find/, function (next) {
   next()
 })
 // AGGREGATION MIDDLEWARE
-tourSchema.pre('aggregate', function (next) {
-  this.pipeline.unshift({ $match: { secretTour: { $ne: true } } })
+// tourSchema.pre('aggregate', function (next) {
+//   this.pipeline.unshift({ $match: { secretTour: { $ne: true } } })
 
-  console.log(this.pipeline()) // point to the current aggregation function
-  next()
-})
+//   console.log(this.pipeline()) // point to the current aggregation function
+//   next()
+// })
 
 tourSchema.post(/^find/, function (document, next) {
   console.log(`Query took: ${Date.now() - this.start} milliseconds`)

@@ -17,14 +17,33 @@ const reviewRouter = require('../routes/reviewRoutes')
 //   next()
 // })
 
-router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan)
+router.use('/:tourId/reviews', reviewRouter)
+
 router.route('/tour-statistics').get(tourController.getTourStatistics)
 
 router
-  .route('/')
-  .get(authController.protect, tourController.getAllTours)
-  .post(tourController.addNewTour) // Chaining two middlewares
+  .route('/monthly-plan/:year')
+  .get(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide', 'guide'),
+    tourController.getMonthlyPlan,
+  )
 
+router
+  .route('/')
+  .get(tourController.getAllTours)
+  .post(
+    authController.protect,
+    authController.restrictTo('admin', 'lead-guide'),
+    tourController.addNewTour,
+  )
+
+// to get the tours within a specific distance
+router
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(tourController.getToursWithin)
+//    /tours-distance?distance=234&center=-40,34&unit=mi // THIS WAS THE SEND WAY TO MAKE THE URL
+router.route('/distance/:latlng/unit/:unit').get(tourController.getDistances)
 router
   .route('/:id')
   .get(tourController.getTourById)
@@ -34,7 +53,5 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     tourController.deleteTourById,
   )
-
-router.use('/:tourId/reviews', reviewRouter)
 
 module.exports = router

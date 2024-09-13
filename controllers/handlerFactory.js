@@ -89,6 +89,7 @@ exports.getAll = (Model) =>
       .limit()
       .paginate()
 
+    // const document = await features.queryForMongo.explain()
     const document = await features.queryForMongo
 
     response.status(200).json({

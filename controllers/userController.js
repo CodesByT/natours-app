@@ -35,6 +35,10 @@ exports.UpdateMe = catchAsync(async (request, response, next) => {
     },
   })
 })
+exports.getMe = (request, response, next) => {
+  request.params.id = request.user.id
+  next()
+}
 
 exports.createNewUsers = (request, response) => {
   response.status(500).json({

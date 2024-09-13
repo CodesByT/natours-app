@@ -12,18 +12,19 @@ router.post('/login', authController.login)
 router.post('/forgotPassword', authController.forgotPassword)
 router.patch('/resetPassword/:token', authController.resetPassword)
 
-router.patch(
-  '/updateMyPassword',
-  authController.protect,
-  authController.updatePassword,
-)
-router.delete(
-  '/deactivate-me',
-  authController.protect,
-  userController.deactivateMe,
-)
+router.use(authController.protect) // this will protect all the routes comming after this
 
-router.patch('/updateMe', authController.protect, userController.UpdateMe)
+router.patch('/updateMyPassword', authController.updatePassword)
+router.delete('/deactivate-me', userController.deactivateMe)
+
+router.patch('/updateMe', userController.UpdateMe)
+router.get(
+  '/me',
+  authController.protect,
+  userController.getMe,
+  userController.getUser,
+)
+router.use(authController.restrictTo('admin'))
 
 router
   .route('/')
@@ -34,10 +35,6 @@ router
   .route('/:id')
   .get(userController.getUser)
   .patch(userController.updateUserById)
-  .delete(
-    authController.protect,
-    authController.restrictTo('admin'),
-    userController.deleteUserById,
-  )
+  .delete(userController.deleteUserById)
 
 module.exports = router
