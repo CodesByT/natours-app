@@ -6,15 +6,22 @@ const mongoSanitize = require('express-mongo-sanitize')
 const xss = require('xss-clean')
 const hpp = require('hpp')
 const app = express()
+const path = require('path')
 
 const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
 const reviewRouter = require('./routes/reviewRoutes')
+const viewRouter = require('./routes/viewRoutes')
 
 const AppError = require('./utils/app-error')
 const globalErrorHandler = require('./controllers/errorController')
 
+app.set('view engine', 'pug')
+app.set('views', path.join(__dirname, 'views'))
+
 // GLOBAL MIDDLEWARES
+// Serving static files
+app.use(express.static(path.join(__dirname, 'public'))) // Using a static middleware which will serve the files to the browser e.g. html files etc
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
@@ -54,11 +61,9 @@ app.use(
     ],
   }),
 )
-
-// serving static files
-app.use(express.static(`${__dirname}/dev-data/templates/`)) // Using a static middleware which will serve the files to the browser e.g. html files etc
-
 // Routes
+app.use('/', viewRouter)
+
 app.use('/api/v1/tours', tourRouter)
 app.use('/api/v1/users', userRouter)
 app.use('/api/v1/review', reviewRouter)
