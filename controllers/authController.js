@@ -70,7 +70,7 @@ exports.login = catchAsync(async (request, response, next) => {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 100,
     ),
-    httpOnly: true,
+    httpOnly: true, // this will restrict us to manipulate the cookie in the browser in any way
   }
 
   if (process.env.NODE_ENV == 'production') cookieOptions.secure = true
@@ -85,17 +85,33 @@ exports.login = catchAsync(async (request, response, next) => {
     token: token,
   })
 })
-
+exports.logout = (request, response) => {
+  response.cookie('jwt', 'logged-out', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  })
+  response.status(200).json({
+    status: 'success',
+  })
+}
 exports.protect = catchAsync(async (request, response, next) => {
   // 1) get the token and check it
   let token
+
+  // Our JWT token us always sent from the browser cookies
+  // which is automatically sent by browser with each request
+  // IN API TESTING, we sent the token with Authorization header
+  // with each request in production it is never done like this
 
   if (
     request.headers.authorization &&
     request.headers.authorization.startsWith('Bearer')
   ) {
     token = request.headers.authorization.split(' ')[1]
+  } else if (request.cookies.jwt) {
+    token = request.cookies.jwt
   }
+
   if (!token) {
     return next(new AppError('Not Logged-In!', 401))
   }
@@ -121,6 +137,39 @@ exports.protect = catchAsync(async (request, response, next) => {
   request.user = currentUser
   next()
 })
+
+// Only for rendered pages
+exports.isLoggedin = async (request, response, next) => {
+  if (request.cookies.jwt) {
+    try {
+      //
+      const decodedPayload = await promisify(jwt.verify)(
+        //
+        request.cookies.jwt,
+        process.env.JWT_SECRET,
+      )
+
+      const currentUser = await User.findById(decodedPayload.id)
+      if (!currentUser) return next()
+
+      // Check if user changed his password after token was issued
+
+      if (currentUser.changedPasswordAfter(decodedPayload.iat)) {
+        return next()
+      }
+
+      // THERE IS A LOGGED IN USE
+
+      // here passing the data to all the pug templates available
+      response.locals.user = currentUser
+
+      return next()
+    } catch (error) {
+      return next()
+    }
+  }
+  next()
+}
 
 exports.restrictTo =
   (...roles) =>

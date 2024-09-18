@@ -12,6 +12,7 @@ const tourRouter = require('./routes/tourRoutes')
 const userRouter = require('./routes/userRoutes')
 const reviewRouter = require('./routes/reviewRoutes')
 const viewRouter = require('./routes/viewRoutes')
+const cookieParser = require('cookie-parser')
 
 const AppError = require('./utils/app-error')
 const globalErrorHandler = require('./controllers/errorController')
@@ -30,6 +31,19 @@ if (process.env.NODE_ENV === 'development') {
 // Setting SECUIRTY HTTP HEADERS
 app.use(helmet())
 
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        'https://cdnjs.cloudflare.com',
+        'https://cdn.jsdelivr.net',
+      ],
+    },
+  }),
+)
+
 const limiter = rateLimit({
   // 100 max request from one IP in one Hour
   // HELPS against denial of service attacks and brute force attacks
@@ -40,7 +54,8 @@ const limiter = rateLimit({
 app.use('/api', limiter)
 
 // body parser
-app.use(express.json({ limit: '10kb' }))
+app.use(express.json({ limit: '10kb' })) // it parses the data from the body
+app.use(cookieParser()) // it parses the cookie
 
 // Data Sanatization against noSql query injection
 app.use(mongoSanitize())
@@ -61,6 +76,13 @@ app.use(
     ],
   }),
 )
+
+app.use((request, response, next) => {
+  request.requestTime = new Date().toISOString()
+  console.log(request.cookies)
+  next()
+})
+
 // Routes
 app.use('/', viewRouter)
 
