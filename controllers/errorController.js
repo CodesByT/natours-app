@@ -23,26 +23,50 @@ const handleValidationErrorDB = (err) => {
   const message = `Invalid Entry in a feild.${errors.join('. ')}`
   return new AppError(message, 400)
 }
-const sendErrorProduction = (error, response) => {
-  if (error.isOperational) {
-    response.status(error.statusCode).json({
-      status: error.status,
-      message: error.message,
-    })
-  } else {
-    response.status(500).json({
+const sendErrorProduction = (error, request, response) => {
+  if (request.originalUrl.startsWith('/api')) {
+    // FOR API ERROR
+    if (error.isOperational) {
+      return response.status(error.statusCode).json({
+        status: error.status,
+        message: error.message,
+      })
+    }
+    return response.status(500).json({
       status: 'status',
       message: 'Something went wrong',
     })
   }
-}
-const sendErrorDevelopment = (error, response) => {
-  response.status(error.statusCode).json({
-    status: error.status,
-    error: error,
-    message: error.message,
-    stack: error.stack,
+  // FOR RENDERING WEBSITE
+  if (error.isOperational) {
+    return response.status(error.statusCode).json({
+      status: error.status,
+      message: error.message,
+    })
+  }
+
+  return response.status(err.statusCode).render('error', {
+    title: 'Something went wrong!',
+    msg: 'Please try again later',
   })
+}
+const sendErrorDevelopment = (error, request, response) => {
+  //
+  if (request.originalUrl.startsWith('/api')) {
+    response.status(error.statusCode).json({
+      status: error.status,
+      error: error,
+      message: error.message,
+      stack: error.stack,
+    })
+  }
+  //
+  else {
+    response.status(error.statusCode).render('error', {
+      title: 'Something went wrong!',
+      msg: error.message,
+    })
+  }
 }
 const handleJWTError = (error) => new AppError('Invalid Token!', 401)
 const handleJWTExpiredError = (error) =>
@@ -53,9 +77,10 @@ module.exports = (error, request, response, next) => {
   error.status = error.status || 'error'
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDevelopment(error, response)
+    sendErrorDevelopment(error, request, response)
   } else if (process.env.NODE_ENV === 'production') {
     let err = { ...error }
+    err.message = error.message
 
     if (err.name === 'CastError') {
       err = handleCastErrorDB(err)
@@ -73,6 +98,6 @@ module.exports = (error, request, response, next) => {
       err = handleJWTExpiredError(err)
     }
 
-    sendErrorProduction(err, response)
+    sendErrorProduction(err, request, response)
   }
 }

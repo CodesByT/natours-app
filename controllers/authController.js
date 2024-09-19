@@ -135,6 +135,10 @@ exports.protect = catchAsync(async (request, response, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   request.user = currentUser
+
+  // here passing the data to all the pug templates available
+  response.locals.user = currentUser
+
   next()
 })
 

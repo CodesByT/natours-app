@@ -6,10 +6,20 @@ const viewController = require('../controllers/viewController')
 const authController = require('../controllers/authController')
 
 // this will be attached to each and every request that comes in
-router.use(authController.isLoggedin)
+// router.use(authController.isLoggedin)
 
-router.get('/', viewController.getOverview)
-router.get('/tour/:slug', authController.protect, viewController.getTour)
-router.get('/login', viewController.getLogin)
+router.get('/', authController.isLoggedin, viewController.getOverview)
+
+router.get('/tour/:slug', authController.isLoggedin, viewController.getTour)
+
+router.get('/login', authController.isLoggedin, viewController.getLogin)
+
+router.get('/me', authController.protect, viewController.getAccount)
+
+router.post(
+  '/submit-user-data',
+  authController.protect,
+  viewController.updateUserData,
+)
 
 module.exports = router
